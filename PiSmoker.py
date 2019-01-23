@@ -12,6 +12,8 @@ import Traeger
 import PID as PID
 import LCDDisplay
 from firebase import firebase
+from firebase_admin import credentials
+from firebase_admin import auth
 
 #Parameters
 TempInterval = 3 #Frequency to record temperatures
@@ -53,12 +55,13 @@ Control = PID.PID(Parameters['PB'],Parameters['Ti'],Parameters['Td'])
 Control.setTarget(Parameters['target'])
 
 #Start firebase
-f = open('/home/pi/PiSmoker/AuthToken.txt','r')
-Secret = f.read()
-f.close()
-Params = {'print':'silent'}
-Params = {'auth':Secret, 'print':'silent'} # ".write": "auth !== null"
-firebase = firebase.FirebaseApplication('https://pismoker.firebaseio.com/')
+authToken = '/home/pi/PiSmoker/AuthToken.json'
+databaseUrl = 'https://pismoker.firebaseio.com'
+creds = credentials.Certificate(authToken)
+firebase = firebase.FirebaseApplication(databaseUrl)
+# the 'auth' param is legacy style authentication
+#Params = {'auth':Secret, 'print':'silent'} # ".write": "auth !== null"
+Params = {'access_token': creds.get_access_token(), 'print':'silent'} # ".write": "auth !== null""
 
 #Initialize LCD
 qP = Queue.Queue() #Queue for Parameters
